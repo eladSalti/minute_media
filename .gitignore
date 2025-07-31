@@ -1,0 +1,18 @@
+# Python stuff
+__pycache__/
+.idea/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/
+.pytest_cache/
+.mypy_cache/
+.venv/ # Add this line if your virtual environment is named .venv
+# Folders of reports and videos
+tests/reports/allure-results/
+test/videos/
+# Configuration files
+config.py
+

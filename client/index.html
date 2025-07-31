@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Event Tracker</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    video { width: 100%; max-width: 720px; }
+  </style>
+</head>
+<body>
+  <h1>Video Player</h1>
+  <video id="video" controls>
+    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <div style="height: 3000px;"></div>
+  <script>
+    const video = document.getElementById('video');
+    const userId = 'user-123';
+
+    const sendEvent = (type) => {
+      fetch('/api/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          type,
+          videoTime: video.currentTime,
+          timestamp: new Date().toISOString()
+        })
+      });
+    };
+
+    video.addEventListener('play', () => sendEvent('play'));
+    video.addEventListener('pause', () => sendEvent('play'));
+    video.addEventListener('seeked', () => sendEvent('seeked'));
+
+    window.addEventListener('scroll', () => {
+      if (video.getBoundingClientRect().top < window.innerHeight) {
+        sendEvent('scroll');
+      }
+    });
+  </script>
+</body>
+</html>

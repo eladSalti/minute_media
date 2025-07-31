@@ -1,0 +1,8 @@
+pytest
+requests
+playwright
+allure-pytest
+pandas
+google-generativeai
+pytest-xdist
+pytest-rerunfailures

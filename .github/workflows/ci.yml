@@ -1,0 +1,132 @@
+name: Run Automation Tests with Allure Report
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: ⚡️ Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: 🧪 Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install allure-pytest
+
+    - name: 🌐 Install Playwright and dependencies
+      run: |
+        npx playwright install --with-deps
+
+    - name: 🐳 Start Docker Compose (if applicable)
+      run: |
+        if [ -f "docker-compose.yml" ]; then
+          docker compose up -d --build
+          sleep 5
+        else
+          echo "⚠️ No docker-compose.yml file found, skipping..."
+        fi
+
+    - name: 🔍 Show collected tests
+      run: pytest --collect-only -q
+
+    - name: 🧪 Run tests with Allure
+      run: |
+        mkdir -p reports/allure-results
+        xvfb-run -a pytest test/ \
+          --alluredir=reports/allure-results \
+          --clean-alluredir \
+          -n 2
+        
+       # --- START: Integrate AI Report Analyzer ---
+    - name: 🧠 Run AI Report Analyzer and Print Insights
+      if: always() # Run this step even if tests failed, to get analysis
+      env:
+        # Pass the API key as a GitHub Secret.
+        # Make sure you have created a secret named GOOGLE_API_KEY in your repository settings.
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      run: |
+        # Ensure Python dependencies for AI analyzer are installed (if not already in requirements.txt)
+        pip install google-generativeai pandas 
+        
+        # Change directory to the project root for consistent path resolution
+        cd ${{ github.workspace }}
+        # Run your AI analyzer script.
+        # It's located at 'test/utils/analyze_report_using_ai.py' (or 'analyze_report_using_ai.py' if you kept that name)
+        # The script will correctly find reports at 'test/reports/allure-results' and videos at 'test/videos'
+        # because it's run from the project root and uses relative paths like '../reports/allure-results'
+        python test/utils/analyze_report_using_ai.py
+    # --- END: Integrate AI Report Analyzer ---
+
+    - name: 📦 Install Node.js dependencies
+      if: always()
+      working-directory: ./server
+      run: npm install
+
+    - name: 📦 Upload Allure Results (raw)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results
+        path: reports/allure-results
+
+    - name: 📥 Install Allure CLI
+      if: always()
+      run: |
+        curl -sL https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz -o allure.tgz
+        mkdir -p allure-bin
+        tar -xzf allure.tgz -C allure-bin --strip-components=1
+        chmod +x allure-bin/bin/allure
+        echo "$(pwd)/allure-bin/bin" >> $GITHUB_PATH
+
+    - name: ✅ Check Allure CLI installation
+      if: always()
+      run: |
+        which allure
+        allure --version
+
+    - name: 📊 Generate Allure Report (HTML)
+      if: always()
+      run: |
+        allure generate reports/allure-results -o reports/allure-html --clean
+
+    - name: 🖼 Upload Allure HTML Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-html-report
+        path: reports/allure-html
+
+    - name: 🚀 Deploy to GitHub Pages
+      if: always()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./reports/allure-html
+
+    - name: 🔗 Print Allure Report URL
+      if: always()
+      run: |
+        echo "📊 Allure Report available at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        
+    
+  
+   

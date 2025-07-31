@@ -1,0 +1,1 @@
+21:11:47 - INFO - ✅ Scroll events captured: 3

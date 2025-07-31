@@ -1,0 +1,2 @@
+20:55:20 - INFO - 🎯 Video duration: 10.03 seconds
+20:55:23 - INFO - ✅ Video successfully reached ended state

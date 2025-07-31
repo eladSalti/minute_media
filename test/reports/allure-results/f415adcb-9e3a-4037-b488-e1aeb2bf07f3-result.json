@@ -1,0 +1,1 @@
+{"name": "Send valid event and expect 200 OK", "status": "skipped", "start": 1753985308087, "stop": 1753985308087, "uuid": "1b50799c-e53c-4a23-87f9-b10587a0b4e1", "testCaseId": "6eeecb6de971af306b5bb7afb8dbed97", "fullName": "test.test_api_event.TestApiEvent#test_post_valid_event", "titlePath": ["test", "test_api_event.py", "TestApiEvent"]}

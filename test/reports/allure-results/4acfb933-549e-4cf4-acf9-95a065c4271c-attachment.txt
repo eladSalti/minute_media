@@ -1,0 +1,1 @@
+[32mINFO    [0m MyPlayerLogger:test_edge_cases.py:72 ✅ Scroll events captured: 3
