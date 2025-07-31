@@ -1,0 +1,2 @@
+INFO     MyPlayerLogger:test_edge_cases.py:83 🎯 Video duration: 10.03 seconds
+INFO     MyPlayerLogger:test_edge_cases.py:102 ✅ Video successfully reached ended state
